@@ -1,11 +1,17 @@
 const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
-  res.render('admin/edit-product', {
-    pageTitle: 'Add Product',
-    path: '/admin/add-product',
-    editing: false
-  });
+  if (req.session.isLoggedIn) {
+
+    res.render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      isAuthenticated: req.session.isLoggedIn
+    });
+  } else {
+    res.redirect('/login');
+  }
 };
 
 exports.postAddProduct = (req, res, next) => {
@@ -18,7 +24,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
-    userId: req.user
+    userId: req.user,
   });
   product
     .save()
@@ -43,12 +49,18 @@ exports.getEditProduct = (req, res, next) => {
       if (!product) {
         return res.redirect('/');
       }
-      res.render('admin/edit-product', {
-        pageTitle: 'Edit Product',
-        path: '/admin/edit-product',
-        editing: editMode,
-        product: product
-      });
+      if (req.session.isLoggedIn) {
+
+        res.render('admin/edit-product', {
+          pageTitle: 'Edit Product',
+          path: '/admin/edit-product',
+          editing: editMode,
+          product: product,
+          isAuthenticated: req.session.isLoggedIn
+        });
+      } else {
+        res.redirect('/login');
+      }
     })
     .catch(err => console.log(err));
 };
@@ -81,11 +93,16 @@ exports.getProducts = (req, res, next) => {
     // .populate('userId', 'name')
     .then(products => {
       console.log(products);
-      res.render('admin/products', {
-        prods: products,
-        pageTitle: 'Admin Products',
-        path: '/admin/products'
-      });
+      if (req.session.isLoggedIn) {
+        res.render('admin/products', {
+          prods: products,
+          pageTitle: 'Admin Products',
+          path: '/admin/products',
+          isAuthenticated: req.session.isLoggedIn
+        });
+      } else {
+        res.redirect('/login');
+      }
     })
     .catch(err => console.log(err));
 };
